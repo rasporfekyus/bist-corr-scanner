@@ -13,5 +13,6 @@ venv/
 .vscode/
 
 # Data (büyük dosyalar)
-data/*.parquet
+data/*
+!data/*.parquet
 data/*.xlsx

@@ -1,0 +1,37 @@
+name: Update data daily
+
+on:
+  schedule:
+    - cron: "15 19 * * 1-5"   # Hafta içi 19:15 UTC (TR 22:15) - istersen değiştiririz
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Update parquet files
+        run: python src/update_corr.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/*.parquet
+          git diff --staged --quiet || git commit -m "Daily data update"
+          git push
